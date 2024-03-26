@@ -1,4 +1,8 @@
-# Wordle-iOS 🎲
+<p align="center">
+    <img src="https://github.com/GaryKu0/wordle-iOS/blob/main/wordle/Assets.xcassets/AppIcon.appiconset/mac128.png?raw=true">
+</p>
+
+<h1 align="center">Wordle-iOS 🎲</h1>
 
 Welcome to the Wordle-iOS project, a fun and engaging word-guessing game inspired by the popular Wordle game. This iOS application aims to provide users with a simple yet captivating gameplay experience, challenging them to guess a target word within a limited number of attempts.
 
