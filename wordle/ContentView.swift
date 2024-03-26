@@ -12,32 +12,29 @@ struct ContentView: View {
     @State private var texts: [[String]] = Array(repeating: Array(repeating: "", count: 5), count: 5)
     @FocusState private var focusedField: [Int]?
     let targetWord = "ADIEU"
-    
+    @State private var showingBingoAlert = false
+
     var body: some View {
         VStack {
             Image("logo")
-                            .resizable()
-                            .frame(width: 100, height: 100)
-                            .padding()
-                        HStack {
-                            Text("Wordle")
-                                .bold()
-                                .font(.largeTitle)
-                        }
-                        .padding()
-                        HStack {
-                            Text("Guess the word")
-                                .font(.title)
-                                .bold()
-                        }
-                        .padding()
-                ForEach(0..<5, id: \.self) { i in
+                .resizable()
+                .frame(width: 100, height: 100)
+                .padding()
+            Text("Wordle")
+                .bold()
+                .font(.largeTitle)
+                .padding()
+            Text("Guess the word")
+                .font(.title)
+                .bold()
+                .padding()
+            ForEach(0..<5, id: \.self) { i in
                 HStack {
                     ForEach(0..<5, id: \.self) { j in
                         TextField("", text: Binding(
                             get: { self.texts[i][j] },
                             set: { newValue in
-                                self.handleInput(newValue, atRow: i, column: j)
+                                self.handleInput(newValue.uppercased(), atRow: i, column: j)
                             }
                         ))
                         .focused($focusedField, equals: [i, j])
@@ -69,46 +66,27 @@ struct ContentView: View {
             }
         }
         .padding()
+        .alert(isPresented: $showingBingoAlert) {
+            Alert(title: Text("Bingo!"), message: Text("You've guessed the word correctly."), dismissButton: .default(Text("OK")))
+        }
     }
     
     private func handleInput(_ input: String, atRow row: Int, column: Int) {
-        var newInput = input.uppercased()
-        if newInput.count > 1 {
-            // Extract the last character if the user is trying to enter more than one character.
-            newInput = String(newInput.last!)
-        }
-        
-        // Place the character in the current field.
-        texts[row][column] = String(newInput)
-        
-        // Determine the next field to focus.
-        var nextRow = row
-        var nextColumn = column + 1
-        if nextColumn > 4 {
-            nextColumn = 0
-            nextRow += 1
-        }
-        
-        if nextRow < 5 {
-            // Automatically move focus to the next field.
-            focusedField = [nextRow, nextColumn]
-            
-            // If the next field is already filled, recursively call this method to handle it.
-            if !texts[nextRow][nextColumn].isEmpty {
-                handleInput("", atRow: nextRow, column: nextColumn)
-            }
+        let newInput = input.prefix(1).uppercased() // Keep only the first character and make it uppercase
+        texts[row][column] = newInput
+        if input.count >= 1 && column < 4 {
+            focusedField = [row, column + 1] // Move to the next field on the same row
+        } else if input.count >= 1 && column == 4 && row < 4 {
+            focusedField = [row + 1, 0] // Move to the first field of the next row
         }
     }
     
     private func checkGuess() {
         for row in texts {
             let guess = row.joined()
-            if guess.count == 5 {
-                if guess == targetWord {
-                    print("Bingo!")
-                } else {
-                    print("Wrong, you typed: \(guess)")
-                }
+            if guess.count == 5 && guess == targetWord {
+                showingBingoAlert = true // Show bingo alert
+                break // Exit the loop as we found a correct guess
             }
         }
     }
